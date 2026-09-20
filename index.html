@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Solar System</title>
+
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <div class="loading" id="loading">
+        <div class="loading-text">ENTERING SOLAR SYSTEM</div>
+    </div>
+
+    <canvas id="space"></canvas>
+
+    <div class="interface">
+
+        <div class="top-left">
+            SOLAR SYSTEM
+        </div>
+
+        <div class="top-right">
+
+            <button class="icon-button" id="soundButton" aria-label="Toggle sound">
+                <span class="speaker-icon">
+                    <span class="sound-wave"></span>
+                </span>
+            </button>
+
+            <button class="icon-button" id="settingsButton" aria-label="Settings">
+                <span class="settings-icon"></span>
+            </button>
+
+        </div>
+
+        <div class="center-ui" id="centerUi">
+
+            <h1 class="main-title">
+                SOLAR SYSTEM
+            </h1>
+
+            <div class="buttons">
+
+                <button class="main-button explore-button" id="exploreButton">
+                    EXPLORE
+                </button>
+
+                <button class="main-button" id="quizButton">
+                    QUIZ
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="bottom-info">
+            A JOURNEY THROUGH OUR COSMIC NEIGHBORHOOD
+        </div>
+
+        <div class="explore-hint" id="exploreHint">
+            MOVE OVER A WORLD · CLICK TO SEE
+        </div>
+
+        <div class="planet-label" id="planetLabel">
+
+            <div class="planet-label-name" id="planetLabelName">
+                EARTH
+            </div>
+
+            <div class="planet-label-line">
+                CLICK TO SEE
+            </div>
+
+        </div>
+
+    </div>
+<div class="planet-window" id="planetWindow">
+
+    <button class="planet-close" id="planetClose">
+        ×
+    </button>
+
+    <div class="planet-display" id="planetDisplay"></div>
+
+    <div class="planet-menu">
+
+        <button class="planet-info-button active" data-section="type">
+            <span>◉</span>
+            TYPE
+        </button>
+
+        <button class="planet-info-button" data-section="size">
+            <span>◌</span>
+            SIZE
+        </button>
+
+        <button class="planet-info-button" data-section="surface">
+            <span>◇</span>
+            SURFACE
+        </button>
+
+        <button class="planet-info-button" data-section="moons">
+            <span>◐</span>
+            MOONS
+        </button>
+
+        <button class="planet-info-button" data-section="facts">
+            <span>✦</span>
+            FUN FACTS
+        </button>
+
+    </div>
+
+    <div class="planet-information" id="planetInformation">
+
+        <div class="planet-information-content">
+
+            <div class="planet-section-label">
+                INFO
+            </div>
+
+            <h2 id="planetInfoTitle">
+                EARTH
+            </h2>
+
+            <div id="planetInfoText"></div>
+
+        </div>
+
+    </div>
+
+</div>
+    <div class="message" id="message"></div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module" src="main.js"></script>
+
+</body>
+</html>
