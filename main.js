@@ -1598,6 +1598,10 @@ window.addEventListener(
             return;
         }
 
+        if (planetWindow.classList.contains("visible")) {
+            return;
+        }
+
         updatePointer(event);
 
         raycaster.setFromCamera(
