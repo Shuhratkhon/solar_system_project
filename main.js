@@ -24,96 +24,224 @@ const likeIcon =
     document.getElementById("likeIcon");
 
 let userLiked = false;
+let likeBusy = false;
+
+
+async function ensureAnonymousUser() {
+
+    const {
+        data: sessionData,
+        error: sessionError
+    } = await supabase.auth.getSession();
+
+    if (sessionError) {
+
+        console.error(
+            "Session error:",
+            sessionError
+        );
+
+        return null;
+    }
+
+    if (sessionData.session?.user) {
+
+        return sessionData.session.user;
+    }
+
+    const {
+        data,
+        error
+    } = await supabase.auth.signInAnonymously();
+
+    if (error) {
+
+        console.error(
+            "Anonymous sign-in error:",
+            error
+        );
+
+        return null;
+    }
+
+    if (!data.user) {
+
+        console.error(
+            "Anonymous sign-in returned no user."
+        );
+
+        return null;
+    }
+
+    console.log(
+        "Anonymous user created:",
+        data.user.id
+    );
+
+    return data.user;
+}
+
 
 async function updateLikeState() {
 
-    const { data: userData } =
-        await supabase.auth.getUser();
+    const user =
+        await ensureAnonymousUser();
 
-    if (!userData.user) {
-        await supabase.auth.signInAnonymously();
-    }
+    if (!user) {
 
-    const { data: sessionData } =
-        await supabase.auth.getUser();
+        likeButton.disabled = true;
 
-    if (!sessionData.user) {
         return;
     }
 
-    const { data } =
-        await supabase
-            .from("user_likes")
-            .select("user_id")
-            .eq(
-                "user_id",
-                sessionData.user.id
-            )
-            .maybeSingle();
+    const {
+        data,
+        error
+    } = await supabase
+        .from("user_likes")
+        .select("user_id")
+        .eq(
+            "user_id",
+            user.id
+        )
+        .maybeSingle();
 
-    userLiked = !!data;
+    if (error) {
+
+        console.error(
+            "Like state error:",
+            error
+        );
+
+        return;
+    }
+
+    userLiked =
+        !!data;
 
     likeIcon.textContent =
         userLiked ? "♥" : "♡";
 }
 
+
 async function loadLikeCount() {
 
-    const { data, error } =
-        await supabase
-            .from("likes")
-            .select("count")
-            .eq("id", 1)
-            .maybeSingle();
+    const {
+        data,
+        error
+    } = await supabase
+        .from("likes")
+        .select("count")
+        .eq("id", 1)
+        .maybeSingle();
 
     if (error) {
+
         console.error(
             "Like count error:",
-            JSON.stringify(
-                error,
-                null,
-                2
-            )
+            error
         );
+
         return;
     }
 
     if (data) {
+
         likeCount.textContent =
             data.count;
     }
 }
 
+
 likeButton.addEventListener(
     "click",
     async () => {
 
-        const { data, error } =
-            await supabase.rpc(
-                "toggle_like"
-            );
-
-        if (error) {
-            console.error("Like error:", error);
-            console.error("Like error message:", error.message);
-            console.error("Like error details:", error.details);
-            console.error("Like error hint:", error.hint);
-            console.error("Like error code:", error.code);
+        if (likeBusy) {
             return;
         }
 
-        userLiked = !userLiked;
+        likeBusy = true;
+        likeButton.disabled = true;
+
+        const user =
+            await ensureAnonymousUser();
+
+        if (!user) {
+
+            console.error(
+                "Like cancelled: no authenticated user."
+            );
+
+            likeButton.disabled = false;
+            likeBusy = false;
+
+            return;
+        }
+
+        const {
+            data,
+            error
+        } = await supabase.rpc(
+            "toggle_like"
+        );
+
+        if (error) {
+
+            console.error(
+                "Like error:",
+                error
+            );
+
+            likeButton.disabled = false;
+            likeBusy = false;
+
+            return;
+        }
+
+        userLiked =
+            !userLiked;
 
         likeIcon.textContent =
             userLiked ? "♥" : "♡";
 
-        likeCount.textContent =
-            data;
+        if (data !== null) {
+
+            likeCount.textContent =
+                data;
+        }
+
+        likeButton.disabled = false;
+        likeBusy = false;
     }
 );
 
 updateLikeState();
 loadLikeCount();
+
+supabase
+    .channel("likes-realtime")
+    .on(
+        "postgres_changes",
+        {
+            event: "UPDATE",
+            schema: "public",
+            table: "likes",
+            filter: "id=eq.1"
+        },
+        (payload) => {
+
+            if (
+                payload.new &&
+                payload.new.count !== undefined
+            ) {
+
+                likeCount.textContent =
+                    payload.new.count;
+            }
+        }
+    )
+    .subscribe();
 
 
 import * as THREE from "three";
