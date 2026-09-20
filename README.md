@@ -35,5 +35,3 @@ real-time update using Supabase)
 - Better mobile controls
 - Optional space audio
 - Spacecraft and satellite objects
-
-pls
