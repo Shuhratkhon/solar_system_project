@@ -20,24 +20,42 @@ const likeButton =
 const likeCount =
     document.getElementById("likeCount");
 
-likeButton.addEventListener(
-    "click",
-    async () => {
+const likeIcon =
+    document.getElementById("likeIcon");
 
-        const { data, error } =
-            await supabase.rpc("add_like");
+let userLiked = false;
 
-        if (error) {
-            console.error(
-                "Like error:",
-                error
-            );
-            return;
-        }
+async function updateLikeState() {
 
-        likeCount.textContent = data;
+    const { data: userData } =
+        await supabase.auth.getUser();
+
+    if (!userData.user) {
+        await supabase.auth.signInAnonymously();
     }
-);
+
+    const { data: sessionData } =
+        await supabase.auth.getUser();
+
+    if (!sessionData.user) {
+        return;
+    }
+
+    const { data } =
+        await supabase
+            .from("user_likes")
+            .select("user_id")
+            .eq(
+                "user_id",
+                sessionData.user.id
+            )
+            .maybeSingle();
+
+    userLiked = !!data;
+
+    likeIcon.textContent =
+        userLiked ? "♥" : "♡";
+}
 
 async function loadLikeCount() {
 
@@ -46,20 +64,55 @@ async function loadLikeCount() {
             .from("likes")
             .select("count")
             .eq("id", 1)
-            .single();
+            .maybeSingle();
 
     if (error) {
         console.error(
             "Like count error:",
-            error
+            JSON.stringify(
+                error,
+                null,
+                2
+            )
         );
         return;
     }
 
-    likeCount.textContent =
-        data.count;
+    if (data) {
+        likeCount.textContent =
+            data.count;
+    }
 }
 
+likeButton.addEventListener(
+    "click",
+    async () => {
+
+        const { data, error } =
+            await supabase.rpc(
+                "toggle_like"
+            );
+
+        if (error) {
+            console.error("Like error:", error);
+            console.error("Like error message:", error.message);
+            console.error("Like error details:", error.details);
+            console.error("Like error hint:", error.hint);
+            console.error("Like error code:", error.code);
+            return;
+        }
+
+        userLiked = !userLiked;
+
+        likeIcon.textContent =
+            userLiked ? "♥" : "♡";
+
+        likeCount.textContent =
+            data;
+    }
+);
+
+updateLikeState();
 loadLikeCount();
 
 

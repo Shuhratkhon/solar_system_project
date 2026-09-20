@@ -84,6 +84,10 @@ body {
     font-size: 18px;
 }
 
+#likeCount {
+    color: white;
+}
+
 .speaker-icon {
     position: relative;
     width: 16px;
