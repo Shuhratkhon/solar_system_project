@@ -79,6 +79,11 @@ body {
     transform: scale(1.06);
 }
 
+#likeIcon {
+    color: #fca5a5;
+    font-size: 18px;
+}
+
 .speaker-icon {
     position: relative;
     width: 16px;

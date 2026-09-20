@@ -1,3 +1,68 @@
+import {
+    createClient
+} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const supabaseUrl =
+    "https://yahdltcbqrlepdtittdw.supabase.co";
+
+const supabaseKey =
+    "sb_publishable_w597cITNuGIRj_laJKpd4A_BVsxT9g6";
+
+const supabase =
+    createClient(
+        supabaseUrl,
+        supabaseKey
+    );
+
+const likeButton =
+    document.getElementById("likeButton");
+
+const likeCount =
+    document.getElementById("likeCount");
+
+likeButton.addEventListener(
+    "click",
+    async () => {
+
+        const { data, error } =
+            await supabase.rpc("add_like");
+
+        if (error) {
+            console.error(
+                "Like error:",
+                error
+            );
+            return;
+        }
+
+        likeCount.textContent = data;
+    }
+);
+
+async function loadLikeCount() {
+
+    const { data, error } =
+        await supabase
+            .from("likes")
+            .select("count")
+            .eq("id", 1)
+            .single();
+
+    if (error) {
+        console.error(
+            "Like count error:",
+            error
+        );
+        return;
+    }
+
+    likeCount.textContent =
+        data.count;
+}
+
+loadLikeCount();
+
+
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
